@@ -1,0 +1,87 @@
+{
+	"blog": {
+		"blogger_id": "8865001629041340619",
+		"api_key": "AIzaSyAN1CMcRov4JzBh65f90XnZVT7RgVJ3g3g"
+	},
+	"app": {
+		"status": "1",
+		"show_book_detail_view": "true",
+		"show_related_book": "true",
+		"allow_save_book_in_storage": "true",
+		"swipe_horizontal_reading_book": "true",
+		"show_scroll_handle_reading_book": "true",
+		"custom_label_list": "false"
+	},
+	"url": {
+		"more_apps_url": "https://play.google.com/store/apps/developer?id=SolodroidX",
+		"privacy_policy_url": "https://sites.google.com/view/blogger-ebook-app-privacy",
+		"redirect_url": ""
+	},
+	"ads": {
+		"ad_status": "1",
+		"ad_type": "admob",
+		"backup_ads": "none",
+		"admob_publisher_id": "pub-3940256099942544",
+		"admob_app_id": "ca-app-pub-3940256099942544~3347511713",
+		"admob_banner_unit_id": "ca-app-pub-3940256099942544/6300978111",
+		"admob_interstitial_unit_id": "ca-app-pub-3940256099942544/1033173712",
+		"admob_native_unit_id": "ca-app-pub-3940256099942544/2247696110",
+		"admob_app_open_ad_unit_id": "ca-app-pub-3940256099942544/3419835294",
+		"ad_manager_banner_unit_id": "/6499/example/banner",
+		"ad_manager_interstitial_unit_id": "/6499/example/interstitial",
+		"ad_manager_native_unit_id": "/6499/example/native",
+		"ad_manager_app_open_ad_unit_id": "/6499/example/app-open",
+		"fan_banner_unit_id": "IMG_16_9_APP_INSTALL#1102290040176998_1102321626840506",
+		"fan_interstitial_unit_id": "IMG_16_9_APP_INSTALL#1102290040176998_1103218190084183",
+		"fan_native_unit_id": "IMG_16_9_APP_INSTALL#1102290040176998_1142394442833224",
+		"startapp_app_id": "0",
+		"unity_game_id": "4089993",
+		"unity_banner_placement_id": "banner",
+		"unity_interstitial_placement_id": "video",
+		"applovin_banner_ad_unit_id": "0",
+		"applovin_interstitial_ad_unit_id": "0",
+		"applovin_native_ad_manual_unit_id": "0",
+		"applovin_app_open_ad_unit_id": "0",
+		"applovin_banner_zone_id": "0",
+		"applovin_banner_mrec_zone_id": "0",
+		"applovin_interstitial_zone_id": "0",
+		"ironsource_app_key": "85460dcd",
+		"ironsource_banner_placement_name": "DefaultBanner",
+		"ironsource_interstitial_placement_name": "DefaultInterstitial",
+		"interstitial_ad_interval": 3
+	},
+	"labels": [
+		{
+			"term": "Computers & technology",
+			"image": "https://i.ibb.co/djHQtvF/computers.png"
+		},
+		{
+			"term": "Education",
+			"image": "https://i.ibb.co/S3xRdd9/education.png"
+		},
+		{
+			"term": "Health & body",
+			"image": "https://i.ibb.co/KhDNn84/health.png"
+		},
+		{
+			"term": "History",
+			"image": "https://i.ibb.co/BtKVsYN/history.png"
+		},
+		{
+			"term": "Fiction & literary collections",
+			"image": "https://i.ibb.co/wSsD537/fictions.png"
+		},
+		{
+			"term": "Business & investing",
+			"image": "https://i.ibb.co/tsPVZKm/business.png"
+		},
+		{
+			"term": "Parenting & families",
+			"image": "https://i.ibb.co/nb0hc0S/parenting.png"
+		},
+		{
+			"term": "Biographies & memoirs",
+			"image": "https://i.ibb.co/P6sHtpB/biography.png"
+		}
+	]
+}
