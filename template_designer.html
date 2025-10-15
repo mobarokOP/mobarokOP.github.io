@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Template Designer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+        }
+        
+        #canvas {
+            width: 210px;
+            height: 355px;
+            border: 2px solid #333;
+            position: relative;
+            background: white;
+            margin: 20px;
+        }
+        
+        #tools {
+            width: 300px;
+            padding: 20px;
+        }
+        
+        .element {
+            position: absolute;
+            border: 1px dashed #999;
+            cursor: move;
+        }
+        
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas"></div>
+    
+    <div id="tools">
+        <h2>Add Elements</h2>
+        <button onclick="addText()">Add Text</button>
+        <button onclick="addImage()">Add Image</button>
+        <button onclick="addQR()">Add QR Code</button>
+        <button onclick="addContainer()">Add Container</button>
+        
+        <hr>
+        
+        <h2>Template Settings</h2>
+        <label>Template Name:</label>
+        <input type="text" id="templateName"><br><br>
+        
+        <label>Background Type:</label>
+        <select id="bgType">
+            <option value="gradient">Gradient</option>
+            <option value="solid">Solid</option>
+        </select><br><br>
+        
+        <button onclick="exportTemplate()">Export JSON</button>
+    </div>
+    
+    <script>
+        let elements = [];
+        let selectedElement = null;
+        
+        function addText() {
+            const textDiv = document.createElement('div');
+            textDiv.className = 'element';
+            textDiv.style.left = '50px';
+
+      textDiv.style.top = '50px';
+            textDiv.style.width = '100px';
+            textDiv.style.height = '30px';
+            textDiv.contentEditable = true;
+            textDiv.innerText = 'Text Element';
+            textDiv.style.fontSize = '14px';
+            textDiv.style.color = '#000000';
+            
+            makeDraggable(textDiv);
+            document.getElementById('canvas').appendChild(textDiv);
+            
+            elements.push({
+                id: 'text_' + Date.now(),
+                type: 'text',
+                position: {
+                    x: 50,
+                    y: 50,
+                    width: 100,
+                    height: 30
+                },
+                style: {
+                    fontSize: 14,
+                    color: '#000000'
+                },
+                editable: true,
+                dataField: 'custom_field'
+            });
+        }
+        
+        function addImage() {
+            const imgDiv = document.createElement('div');
+            imgDiv.className = 'element';
+            imgDiv.style.left = '50px';
+            imgDiv.style.top = '100px';
+            imgDiv.style.width = '80px';
+            imgDiv.style.height = '80px';
+            imgDiv.style.backgroundColor = '#CCCCCC';
+            imgDiv.innerText = '🖼️';
+            imgDiv.style.fontSize = '40px';
+            imgDiv.style.textAlign = 'center';
+            imgDiv.style.lineHeight = '80px';
+            
+            makeDraggable(imgDiv);
+            document.getElementById('canvas').appendChild(imgDiv);
+            
+            elements.push({
+                id: 'image_' + Date.now(),
+                type: 'image',
+                position: {
+                    x: 50,
+                    y: 100,
+                    width: 80,
+                    height: 80
+                },
+                editable: true,
+                dataField: 'userImage'
+            });
+        }
+        
+        function addQR() {
+            const qrDiv = document.createElement('div');
+            qrDiv.className = 'element';
+            qrDiv.style.left = '65px';
+            qrDiv.style.top = '200px';
+            qrDiv.style.width = '80px';
+            qrDiv.style.height = '80px';
+            qrDiv.style.backgroundColor = '#000';
+            qrDiv.innerText = 'QR';
+            qrDiv.style.color = '#FFF';
+            qrDiv.style.textAlign = 'center';
+            qrDiv.style.lineHeight = '80px';
+            
+            makeDraggable(qrDiv);
+            document.getElementById('canvas').appendChild(qrDiv);
+            
+            elements.push({
+                id: 'qr_' + Date.now(),
+                type: 'qr',
+                position: {
+                    x: 65,
+                    y: 200,
+                    width: 80,
+                    height: 80
+                },
+                dataField: 'qrData'
+            });
+        }
+        
+        function addContainer() {
+            const container = document.createElement('div');
+            container.className = 'element';
+            container.style.left = '20px';
+            container.style.top = '250px';
+            container.style.width = '170px';
+            container.style.height = '60px';
+            container.style.backgroundColor = 'rgba(255,255,255,0.5)';
+            container.style.borderRadius = '12px';
+            
+            makeDraggable(container);
+            document.getElementById('canvas').appendChild(container);
+            
+            elements.push({
+                id: 'container_' + Date.now(),
+                type: 'container',
+                position: {
+                    x: 20,
+                    y: 250,
+                    width: 170,
+                    height: 60
+                },
+                style: {
+                    backgroundColor: '#80FFFFFF',
+                    borderRadius: 12
+                },
+                children: []
+            });
+        }
+        
+        function makeDraggable(element) {
+            let isDragging = false;
+            let offsetX, offsetY;
+            
+            element.addEventListener('mousedown', function(e) {
+                isDragging = true;
+                offsetX = e.clientX - element.offsetLeft;
+                offsetY = e.clientY - element.offsetTop;
+                selectedElement = element;
+                
+                // Highlight selected
+                document.querySelectorAll('.element').forEach(el => {
+                    el.style.borderColor = '#999';
+                });
+                element.style.borderColor = '#0066FF';
+                element.style.borderWidth = '2px';
+            });
+            
+            document.addEventListener('mousemove', function(e) {
+                if (isDragging) {
+                    element.style.left = (e.clientX - offsetX) + 'px';
+                    element.style.top = (e.clientY - offsetY) + 'px';
+                }
+            });
+            
+            document.addEventListener('mouseup', function() {
+                if (isDragging) {
+                    isDragging = false;
+                    updateElementPosition(element);
+                }
+            });
+            
+            // Resize handles
+            element.addEventListener('dblclick', function() {
+                showPropertiesPanel(element);
+            });
+        }
+        
+        function updateElementPosition(element) {
+            // Update elements array with new position
+            const index = Array.from(document.getElementById('canvas').children).indexOf(element);
+            if (elements[index]) {
+                elements[index].position.x = parseInt(element.style.left);
+                elements[index].position.y = parseInt(element.style.top);
+            }
+        }
+        
+        function showPropertiesPanel(element) {
+            const panel = document.createElement('div');
+            panel.id = 'propertiesPanel';
+            panel.style.position = 'fixed';
+            panel.style.right = '20px';
+            panel.style.top = '20px';
+            panel.style.width = '250px';
+            panel.style.background = 'white';
+            panel.style.border = '2px solid #333';
+            panel.style.padding = '20px';
+            panel.style.zIndex = '1000';
+            
+            panel.innerHTML = `
+                <h3>Properties</h3>
+                <label>Width:</label>
+                <input type="number" id="propWidth" value="${element.offsetWidth}"><br><br>
+                <label>Height:</label>
+                <input type="number" id="propHeight" value="${element.offsetHeight}"><br><br>
+                <label>Font Size:</label>
+                <input type="number" id="propFontSize" value="14"><br><br>
+                <label>Color:</label>
+                <input type="color" id="propColor" value="#000000"><br><br>
+                <label>Data Field:</label>
+                <select id="propDataField">
+                    <option value="companyName">Company Name</option>
+                    <option value="employeeName">Employee Name</option>
+                    <option value="position">Position</option>
+                    <option value="employeeId">Employee ID</option>
+                    <option value="email">Email</option>
+                    <option value="phone">Phone</option>
+                    <option value="userImage">User Image</option>
+                    <option value="companyLogo">Company Logo</option>
+                    <option value="qrData">QR Data</option>
+                </select><br><br>
+                <button onclick="applyProperties()">Apply</button>
+                <button onclick="closeProperties()">Close</button>
+            `;
+            
+            document.body.appendChild(panel);
+        }
+        
+        function applyProperties() {
+            if (selectedElement) {
+                selectedElement.style.width = document.getElementById('propWidth').value + 'px';
+                selectedElement.style.height = document.getElementById('propHeight').value + 'px';
+                selectedElement.style.fontSize = document.getElementById('propFontSize').value + 'px';
+                selectedElement.style.color = document.getElementById('propColor').value;
+            }
+            closeProperties();
+        }
+        
+        function closeProperties() {
+            const panel = document.getElementById('propertiesPanel');
+            if (panel) panel.remove();
+        }
+        
+        function exportTemplate() {
+            const templateName = document.getElementById('templateName').value || 'custom_template';
+            const bgType = document.getElementById('bgType').value;
+            
+            const template = {
+                templateId: templateName.toLowerCase().replace(/ /g, '_'),
+                templateName: templateName,
+                version: '1.0',
+                front: {
+                    background: {
+                        type: bgType,
+                        colors: bgType === 'gradient' ? ['#667eea', '#764ba2'] : ['#FFFFFF'],
+                        angle: 135
+                    },
+                    elements: elements
+                },
+                back: {
+                    background: {
+                        type: bgType,
+                        colors: bgType === 'gradient' ? ['#667eea', '#764ba2'] : ['#FFFFFF'],
+                        angle: 135
+                    },
+                    elements: []
+                }
+            };
+            
+            const json = JSON.stringify(template, null, 2);
+            
+            // Download JSON file
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = template.templateId + '.json';
+            a.click();
+            
+            // Also display in textarea for copying
+            const textarea = document.createElement('textarea');
+            textarea.style.width = '100%';
+            textarea.style.height = '300px';
+            textarea.value = json;
+            document.body.appendChild(textarea);
+        }
+    </script>
+</body>
+</html>
