@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Arabic Calendar</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Noto+Sans+Bengali:wght@400;500;600&family=Noto+Naskh+Arabic:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Add hidden elements for updateInfo -->
+    <div style="display:none;">
+        <div id="season"></div>
+        <div id="bengaliSeason"></div>
+        <div id="dayOfYear"></div>
+        <div id="weekNumber"></div>
+        <!-- Stubs for other calendars -->
+        <div id="unifiedCalendar"></div>
+        <div id="unifiedDate"></div>
+        <div id="unifiedInfo"></div>
+        <div id="unifiedBengali"></div>
+        <div id="unifiedArabic"></div>
+        <div id="bengaliCalendar"></div>
+        <div id="bengaliDate"></div>
+        <div id="bengaliInfo"></div>
+        <div id="englishCalendar"></div>
+        <div id="englishDate"></div>
+        <div id="englishInfo"></div>
+    </div>
+
+    <div class="container">
+        <div class="calendars-grid">
+            <div class="calendar-card">
+                <div class="calendar-header">
+                    <h2 class="calendar-title bengali-text">ইসলামিক ক্যালেন্ডার</h2>
+                    <div class="nav-controls">
+                        <div class="nav-arrow" onclick="changeMonthLocal(-1)">‹</div>
+                        <div class="nav-arrow" onclick="changeMonthLocal(1)">›</div>
+                    </div>
+                </div>
+                <div class="current-date-display bengali-text">
+                    <div class="date-large" id="arabicDate">—</div>
+                    <div class="date-info" id="arabicInfo">Loading...</div>
+                </div>
+                <div class="calendar-days" id="arabicCalendar">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // calendarApp is created by script.js - just use it
+        function changeMonthLocal(direction) {
+            if (calendarApp) {
+                calendarApp.currentDates.arabic.setMonth(calendarApp.currentDates.arabic.getMonth() + direction);
+                calendarApp.renderArabicCalendar();
+            }
+        }
+        
+        function changeMonth(calendar, direction) {
+            changeMonthLocal(direction);
+        }
+    </script>
+</body>
+</html>
