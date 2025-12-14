@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tri-Calendar - Bangla, English & Arabic</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Noto+Sans+Bengali:wght@400;500;600&family=Noto+Naskh+Arabic:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a1a2e;
+            --secondary: #16213e;
+            --accent: #0f4c75;
+            --highlight: #3282b8;
+            --gold: #d4af37;
+            --light: #e8e8e8;
+            --success: #4ecca3;
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.15);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Mono', monospace;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: var(--light);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(245, 87, 108, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(78, 204, 163, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 5vw, 4rem);
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--gold), var(--highlight), var(--success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            color: var(--light);
+            opacity: 0.8;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        /* Loading Spinner */
+        .loading-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(26, 26, 46, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+        }
+
+        .loading-container.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid var(--gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        .loading-text {
+            font-size: 1.1rem;
+            color: var(--light);
+            opacity: 0.9;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        /* Calendar Navigation */
+        .calendar-nav {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            animation: fadeIn 1s ease-out 0.3s backwards;
+        }
+
+        .nav-btn {
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            color: var(--light);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+        }
+
+        .nav-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .nav-btn:hover {
+            border-color: var(--gold);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(212, 175, 55, 0.3);
+        }
+
+        .nav-btn.active {
+            background: var(--gradient-1);
+            border-color: transparent;
+            color: white;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Calendar Grid */
+        .calendars-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .calendar-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(20px);
+            box-shadow: var(--shadow-lg);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: fadeInUp 0.8s ease-out backwards;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .calendar-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+            transform: rotate(45deg);
+            pointer-events: none;
+        }
+
+        .calendar-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .calendar-card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .calendar-card:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .calendar-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(212, 175, 55, 0.5);
+            box-shadow: 0 20px 40px rgba(212, 175, 55, 0.2);
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .calendar-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 600;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .calendar-card:nth-child(2) .calendar-title {
+            background: var(--gradient-2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .calendar-card:nth-child(3) .calendar-title {
+            background: var(--gradient-3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-arrow {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+        }
+
+        .nav-arrow:hover {
+            background: var(--gold);
+            border-color: var(--gold);
+            transform: scale(1.1);
+        }
+
+        .current-date-display {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            font-size: 1.1rem;
+        }
+
+        .date-large {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: 5px;
+        }
+
+        .date-info {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        .bengali-text {
+            font-family: 'Noto Sans Bengali', sans-serif;
+        }
+
+        .arabic-text {
+            font-family: 'Noto Naskh Arabic', serif;
+            direction: rtl;
+        }
+
+        /* Calendar Days Grid */
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .day-header {
+            text-align: center;
+            font-weight: 600;
+            padding: 10px;
+            font-size: 0.85rem;
+            color: var(--gold);
+            opacity: 0.8;
+        }
+
+        .day-cell {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            border: 1px solid transparent;
+            padding: 5px;
+            gap: 2px;
+        }
+
+        .day-cell:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.05);
+            border-color: var(--gold);
+            z-index: 10;
+        }
+
+        .day-cell.today {
+            background: var(--gold);
+            color: var(--primary);
+            font-weight: 700;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+        }
+
+        .day-cell.other-month {
+            opacity: 0.3;
+        }
+
+        .date-main {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #4facfe;
+            margin-bottom: 2px;
+        }
+
+        .date-bengali {
+            font-size: 0.7rem;
+            color: #667eea;
+            font-family: 'Noto Sans Bengali', sans-serif;
+        }
+
+        .date-arabic {
+            font-size: 0.7rem;
+            color: #f5576c;
+            font-family: 'Noto Naskh Arabic', serif;
+        }
+
+        .day-cell.today .date-main,
+        .day-cell.today .date-bengali,
+        .day-cell.today .date-arabic {
+            color: var(--primary);
+        }
+
+        .month-indicator {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            opacity: 0.6;
+        }
+
+        .month-indicator.bengali-month {
+            background: #667eea;
+        }
+
+        .month-indicator.arabic-month {
+            background: #f5576c;
+        }
+
+        /* Info Section */
+        .info-section {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(20px);
+            animation: fadeIn 1s ease-out 0.5s backwards;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .info-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-5px);
+        }
+
+        .info-label {
+            font-size: 0.85rem;
+            opacity: 0.7;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .info-value {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--gold);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            opacity: 0.6;
+            font-size: 0.9rem;
+            animation: fadeIn 1s ease-out 0.7s backwards;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .calendars-grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .calendar-card {
+                padding: 20px;
+            }
+
+            .nav-btn {
+                padding: 10px 16px;
+                font-size: 0.8rem;
+            }
+
+            .day-cell {
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Error Message */
+        .error-message {
+            background: rgba(245, 87, 108, 0.1);
+            border: 1px solid rgba(245, 87, 108, 0.3);
+            color: #f5576c;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-container" id="loadingScreen">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading Calendars...</div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <header>
+            <h1>Tri-Calendar</h1>
+            <div class="subtitle">Bangla • English • Arabic</div>
+        </header>
+
+        <!-- Calendar Navigation -->
+        <div class="calendar-nav">
+            <button class="nav-btn active" onclick="changeView('unified')">Unified View</button>
+            <button class="nav-btn" onclick="changeView('all')">All Calendars</button>
+            <button class="nav-btn bengali-text" onclick="changeView('bengali')">বাংলা</button>
+            <button class="nav-btn" onclick="changeView('english')">English</button>
+            <button class="nav-btn bengali-text" onclick="changeView('arabic')">আরবি</button>
+        </div>
+
+        <!-- Color Legend -->
+        <div class="color-legend" id="colorLegend" style="display: flex; justify-content: center; gap: 30px; margin-bottom: 30px; flex-wrap: wrap; animation: fadeIn 1s ease-out 0.4s backwards;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="width: 12px; height: 12px; background: #4facfe; border-radius: 50%;"></div>
+                <span style="font-size: 0.9rem;">English Date</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="width: 12px; height: 12px; background: #667eea; border-radius: 50%;"></div>
+                <span style="font-size: 0.9rem; font-family: 'Noto Sans Bengali', sans-serif;">বাংলা তারিখ</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="width: 12px; height: 12px; background: #f5576c; border-radius: 50%;"></div>
+                <span style="font-size: 0.9rem; font-family: 'Noto Sans Bengali', sans-serif;">আরবি তারিখ</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="width: 12px; height: 12px; background: var(--gold); border-radius: 50%;"></div>
+                <span style="font-size: 0.9rem;">Today</span>
+            </div>
+        </div>
+
+        <!-- Calendars Grid -->
+        <div class="calendars-grid" id="calendarsGrid">
+            <!-- Unified Calendar (Main View) -->
+            <div class="calendar-card" id="unifiedCard" style="grid-column: 1 / -1;">
+                <div class="calendar-header">
+                    <h2 class="calendar-title">Unified Calendar</h2>
+                    <div class="nav-controls">
+                        <div class="nav-arrow" onclick="changeMonth('unified', -1)">‹</div>
+                        <div class="nav-arrow" onclick="changeMonth('unified', 1)">›</div>
+                    </div>
+                </div>
+                <div class="current-date-display">
+                    <div class="date-large" id="unifiedDate">—</div>
+                    <div class="date-info" id="unifiedInfo">Loading...</div>
+                    <div style="margin-top: 10px; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+                        <span class="bengali-text" id="unifiedBengali" style="color: #667eea;">—</span>
+                        <span class="bengali-text" id="unifiedArabic" style="color: #f5576c;">—</span>
+                    </div>
+                </div>
+                <div class="calendar-days" id="unifiedCalendar">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Bengali Calendar -->
+            <div class="calendar-card" id="bengaliCard" style="display: none;">
+                <div class="calendar-header">
+                    <h2 class="calendar-title bengali-text">বাংলা</h2>
+                    <div class="nav-controls">
+                        <div class="nav-arrow" onclick="changeMonth('bengali', -1)">‹</div>
+                        <div class="nav-arrow" onclick="changeMonth('bengali', 1)">›</div>
+                    </div>
+                </div>
+                <div class="current-date-display bengali-text">
+                    <div class="date-large" id="bengaliDate">—</div>
+                    <div class="date-info" id="bengaliInfo">Loading...</div>
+                </div>
+                <div class="calendar-days" id="bengaliCalendar">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- English Calendar -->
+            <div class="calendar-card" id="englishCard" style="display: none;">
+                <div class="calendar-header">
+                    <h2 class="calendar-title">English</h2>
+                    <div class="nav-controls">
+                        <div class="nav-arrow" onclick="changeMonth('english', -1)">‹</div>
+                        <div class="nav-arrow" onclick="changeMonth('english', 1)">›</div>
+                    </div>
+                </div>
+                <div class="current-date-display">
+                    <div class="date-large" id="englishDate">—</div>
+                    <div class="date-info" id="englishInfo">Loading...</div>
+                </div>
+                <div class="calendar-days" id="englishCalendar">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Arabic/Islamic Calendar -->
+            <div class="calendar-card" id="arabicCard" style="display: none;">
+                <div class="calendar-header">
+                    <h2 class="calendar-title bengali-text">ইসলামিক ক্যালেন্ডার</h2>
+                    <div class="nav-controls">
+                        <div class="nav-arrow" onclick="changeMonth('arabic', -1)">‹</div>
+                        <div class="nav-arrow" onclick="changeMonth('arabic', 1)">›</div>
+                    </div>
+                </div>
+                <div class="current-date-display bengali-text">
+                    <div class="date-large" id="arabicDate">—</div>
+                    <div class="date-info" id="arabicInfo">Loading...</div>
+                </div>
+                <div class="calendar-days" id="arabicCalendar">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Info Section -->
+        <div class="info-section">
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="info-label">Current Season</div>
+                    <div class="info-value" id="season">—</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label bengali-text">বাংলা ঋতু</div>
+                    <div class="info-value bengali-text" id="bengaliSeason">—</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">Day of Year</div>
+                    <div class="info-value" id="dayOfYear">—</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">Week Number</div>
+                    <div class="info-value" id="weekNumber">—</div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Multi-Calendar System • Created with ❤️</p>
+        </footer>
+    </div>
+
+    <script>
+        // State Management
+        let currentView = 'unified';
+        let currentDates = {
+            english: new Date(),
+            bengali: new Date(),
+            arabic: new Date(),
+            unified: new Date()
+        };
+
+        // Bengali Calendar Configuration
+        const bengaliMonths = [
+            'বৈশাখ', 'জ্যৈষ্ঠ', 'আষাঢ়', 'শ্রাবণ', 'ভাদ্র', 'আশ্বিন',
+            'কার্তিক', 'অগ্রহায়ণ', 'পৌষ', 'মাঘ', 'ফাল্গুন', 'চৈত্র'
+        ];
+
+        const bengaliDays = ['রবি', 'সোম', 'মঙ্গল', 'বুধ', 'বৃহঃ', 'শুক্র', 'শনি'];
+        
+        const bengaliSeasons = [
+            'গ্রীষ্ম', 'গ্রীষ্ম', 'বর্ষা', 'বর্ষা', 'শরৎ', 'শরৎ',
+            'হেমন্ত', 'হেমন্ত', 'শীত', 'শীত', 'বসন্ত', 'বসন্ত'
+        ];
+
+        const bengaliNumbers = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+
+        // Arabic/Islamic Calendar
+        const islamicMonths = [
+            'محرم', 'صفر', 'ربيع الأول', 'ربيع الثاني', 'جمادى الأولى', 'جمادى الآخرة',
+            'رجب', 'شعبان', 'رمضان', 'شوال', 'ذو القعدة', 'ذو الحجة'
+        ];
+
+        const islamicMonthsBengali = [
+            'মহররম', 'সফর', 'রবিউল আউয়াল', 'রবিউস সানি', 'জমাদিউল আউয়াল', 'জমাদিউস সানি',
+            'রজব', 'শাবান', 'রমজান', 'শাওয়াল', 'জিলকদ', 'জিলহজ্জ'
+        ];
+
+        const islamicDays = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+        
+        const arabicNumbers = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+
+        // English Calendar
+        const englishMonths = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+
+        const englishDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+        const seasons = ['Winter', 'Winter', 'Spring', 'Spring', 'Summer', 'Summer', 'Autumn', 'Autumn', 'Autumn', 'Winter', 'Winter', 'Winter'];
+
+        // Utility Functions
+        function toBengaliNumber(num) {
+            return String(num).split('').map(d => bengaliNumbers[parseInt(d)]).join('');
+        }
+
+        function toArabicNumber(num) {
+            return String(num).split('').map(d => arabicNumbers[parseInt(d)]).join('');
+        }
+
+        function gregorianToBengali(date) {
+            const year = date.getFullYear();
+            const month = date.getMonth(); // 0-11
+            const day = date.getDate();
+            
+            // Bengali year calculation
+            let bengaliYear = year - 593;
+            if (month < 3 || (month === 3 && day < 14)) {
+                bengaliYear--;
+            }
+            
+            // Create date boundaries for each Bengali month in current Gregorian year
+            const currentYearMonths = [
+                { start: new Date(year, 3, 14), end: new Date(year, 4, 14), month: 0 },   // Boishakh: Apr 14 - May 14
+                { start: new Date(year, 4, 15), end: new Date(year, 5, 14), month: 1 },   // Joishtho: May 15 - Jun 14
+                { start: new Date(year, 5, 15), end: new Date(year, 6, 15), month: 2 },   // Asharh: Jun 15 - Jul 15
+                { start: new Date(year, 6, 16), end: new Date(year, 7, 15), month: 3 },   // Srabon: Jul 16 - Aug 15
+                { start: new Date(year, 7, 16), end: new Date(year, 8, 15), month: 4 },   // Bhadro: Aug 16 - Sep 15
+                { start: new Date(year, 8, 16), end: new Date(year, 9, 15), month: 5 },   // Ashwin: Sep 16 - Oct 15
+                { start: new Date(year, 9, 16), end: new Date(year, 10, 15), month: 6 },  // Kartik: Oct 16 - Nov 15
+                { start: new Date(year, 10, 16), end: new Date(year, 11, 14), month: 7 }, // Ogrohayon: Nov 16 - Dec 14
+                { start: new Date(year, 11, 15), end: new Date(year + 1, 0, 13), month: 8 }, // Poush: Dec 15 - Jan 13
+            ];
+            
+            const nextYearMonths = [
+                { start: new Date(year, 0, 14), end: new Date(year, 1, 12), month: 9 },   // Magh: Jan 14 - Feb 12
+                { start: new Date(year, 1, 13), end: new Date(year, 2, 13), month: 10 },  // Falgun: Feb 13 - Mar 13
+                { start: new Date(year, 2, 14), end: new Date(year, 3, 13), month: 11 },  // Choitra: Mar 14 - Apr 13
+            ];
+            
+            let bengaliMonth = 0;
+            let bengaliDay = 1;
+            const currentDate = new Date(year, month, day);
+            
+            // Check current year months (Boishakh to Poush)
+            for (let i = 0; i < currentYearMonths.length; i++) {
+                if (currentDate >= currentYearMonths[i].start && currentDate <= currentYearMonths[i].end) {
+                    bengaliMonth = currentYearMonths[i].month;
+                    const diffTime = currentDate - currentYearMonths[i].start;
+                    bengaliDay = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                    break;
+                }
+            }
+            
+            // Check next year months (Magh to Choitra) - these belong to previous Bengali year
+            if (bengaliDay === 1 && bengaliMonth === 0) { // If not found in current year months
+                for (let i = 0; i < nextYearMonths.length; i++) {
+                    if (currentDate >= nextYearMonths[i].start && currentDate <= nextYearMonths[i].end) {
+                        bengaliMonth = nextYearMonths[i].month;
+                        const diffTime = currentDate - nextYearMonths[i].start;
+                        bengaliDay = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                        break;
+                    }
+                }
+            }
+            
+            // Bengali days are 1-indexed (1-30/31), so add 1
+            bengaliDay = bengaliDay + 1;
+            
+            return {
+                year: bengaliYear,
+                month: bengaliMonth,
+                day: bengaliDay,
+                monthName: bengaliMonths[bengaliMonth],
+                season: bengaliSeasons[bengaliMonth]
+            };
+        }
+
+        function gregorianToIslamic(date) {
+            // More accurate Hijri conversion algorithm
+            // Reference epoch: July 16, 622 CE (1 Muharram 1 AH)
+            
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1; // 1-12
+            const day = date.getDate();
+            
+            // Convert to Julian Day Number
+            let a = Math.floor((14 - month) / 12);
+            let y = year + 4800 - a;
+            let m = month + 12 * a - 3;
+            
+            let jdn = day + Math.floor((153 * m + 2) / 5) + 365 * y + 
+                      Math.floor(y / 4) - Math.floor(y / 100) + 
+                      Math.floor(y / 400) - 32045;
+            
+            // Islamic calendar epoch in JDN
+            const islamicEpoch = 1948440;
+            
+            // Days since Islamic epoch
+            let islamicDaysSinceEpoch = jdn - islamicEpoch;
+            
+            // Calculate Islamic year (average year = 354.36667 days)
+            let islamicYear = Math.floor((islamicDaysSinceEpoch * 30) / 10631) + 1;
+            
+            // Calculate the start of the Islamic year
+            let yearStart = Math.floor((islamicYear - 1) * 10631 / 30) + islamicEpoch;
+            
+            // Days into the Islamic year
+            let dayOfYear = jdn - yearStart;
+            
+            // Islamic month lengths (29 or 30 days alternating, with adjustments)
+            const monthLengths = [30, 29, 30, 29, 30, 29, 30, 29, 30, 29, 30, 29];
+            
+            // Adjust for leap year (30 days in 12th month)
+            if ((islamicYear * 11 + 14) % 30 < 11) {
+                monthLengths[11] = 30;
+            }
+            
+            // Find the month
+            let islamicMonth = 0;
+            let islamicDay = dayOfYear;
+            
+            for (let i = 0; i < 12; i++) {
+                if (islamicDay <= monthLengths[i]) {
+                    islamicMonth = i;
+                    break;
+                }
+                islamicDay -= monthLengths[i];
+            }
+            
+            return {
+                year: islamicYear,
+                month: islamicMonth,
+                day: islamicDay,
+                monthName: islamicMonths[islamicMonth],
+                monthNameBengali: islamicMonthsBengali[islamicMonth]
+            };
+        }
+
+        function getWeekNumber(date) {
+            const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+            const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
+            return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+        }
+
+        function getDayOfYear(date) {
+            const start = new Date(date.getFullYear(), 0, 0);
+            const diff = date - start;
+            const oneDay = 1000 * 60 * 60 * 24;
+            return Math.floor(diff / oneDay);
+        }
+
+        // Calendar Rendering Functions
+        function renderUnifiedCalendar() {
+            const date = currentDates.unified;
+            const year = date.getFullYear();
+            const month = date.getMonth();
+            const today = new Date();
+            
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const prevMonthDays = new Date(year, month, 0).getDate();
+            
+            let html = '';
+            
+            // Day headers
+            englishDays.forEach(day => {
+                html += `<div class="day-header">${day}</div>`;
+            });
+            
+            // Previous month days
+            for (let i = firstDay - 1; i >= 0; i--) {
+                const dayNum = prevMonthDays - i;
+                const tempDate = new Date(year, month - 1, dayNum);
+                const bengaliDate = gregorianToBengali(tempDate);
+                const islamicDate = gregorianToIslamic(tempDate);
+                
+                html += `<div class="day-cell other-month">
+                    <div class="date-main">${dayNum}</div>
+                    <div class="date-bengali">${toBengaliNumber(bengaliDate.day)}</div>
+                    <div class="date-arabic">${islamicDate.day}</div>
+                </div>`;
+            }
+            
+            // Current month days
+            for (let day = 1; day <= daysInMonth; day++) {
+                const tempDate = new Date(year, month, day);
+                const bengaliDate = gregorianToBengali(tempDate);
+                const islamicDate = gregorianToIslamic(tempDate);
+                
+                const isToday = day === today.getDate() && 
+                               month === today.getMonth() && 
+                               year === today.getFullYear();
+                
+                const className = isToday ? 'day-cell today' : 'day-cell';
+                
+                // Check if it's the first day of Bengali or Arabic month
+                let monthIndicator = '';
+                if (bengaliDate.day === 1) {
+                    monthIndicator += `<div class="month-indicator bengali-month" title="${bengaliDate.monthName}"></div>`;
+                }
+                if (islamicDate.day === 1) {
+                    monthIndicator += `<div class="month-indicator arabic-month" title="${islamicDate.monthNameBengali}" style="right: ${bengaliDate.day === 1 ? '10px' : '2px'};"></div>`;
+                }
+                
+                html += `<div class="${className}">
+                    ${monthIndicator}
+                    <div class="date-main">${day}</div>
+                    <div class="date-bengali">${toBengaliNumber(bengaliDate.day)}</div>
+                    <div class="date-arabic">${islamicDate.day}</div>
+                </div>`;
+            }
+            
+            // Next month days
+            const totalCells = firstDay + daysInMonth;
+            const remainingCells = 42 - totalCells;
+            for (let day = 1; day <= remainingCells; day++) {
+                const tempDate = new Date(year, month + 1, day);
+                const bengaliDate = gregorianToBengali(tempDate);
+                const islamicDate = gregorianToIslamic(tempDate);
+                
+                html += `<div class="day-cell other-month">
+                    <div class="date-main">${day}</div>
+                    <div class="date-bengali">${toBengaliNumber(bengaliDate.day)}</div>
+                    <div class="date-arabic">${islamicDate.day}</div>
+                </div>`;
+            }
+            
+            document.getElementById('unifiedCalendar').innerHTML = html;
+            document.getElementById('unifiedDate').textContent = date.getDate();
+            document.getElementById('unifiedInfo').textContent = 
+                `${englishMonths[month]} ${year}`;
+            
+            // Update Bengali and Arabic info
+            const currentBengaliDate = gregorianToBengali(date);
+            const currentIslamicDate = gregorianToIslamic(date);
+            
+            document.getElementById('unifiedBengali').textContent = 
+                `${toBengaliNumber(currentBengaliDate.day)} ${currentBengaliDate.monthName} ${toBengaliNumber(currentBengaliDate.year)}`;
+            document.getElementById('unifiedArabic').textContent = 
+                `${toBengaliNumber(currentIslamicDate.day)} ${currentIslamicDate.monthNameBengali} ${toBengaliNumber(currentIslamicDate.year)} হিজরি`;
+        }
+
+        function renderEnglishCalendar() {
+            const date = currentDates.english;
+            const year = date.getFullYear();
+            const month = date.getMonth();
+            const today = new Date();
+            
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const prevMonthDays = new Date(year, month, 0).getDate();
+            
+            let html = '';
+            
+            // Day headers
+            englishDays.forEach(day => {
+                html += `<div class="day-header">${day}</div>`;
+            });
+            
+            // Previous month days
+            for (let i = firstDay - 1; i >= 0; i--) {
+                html += `<div class="day-cell other-month">${prevMonthDays - i}</div>`;
+            }
+            
+            // Current month days
+            for (let day = 1; day <= daysInMonth; day++) {
+                const isToday = day === today.getDate() && 
+                               month === today.getMonth() && 
+                               year === today.getFullYear();
+                const className = isToday ? 'day-cell today' : 'day-cell';
+                html += `<div class="${className}">${day}</div>`;
+            }
+            
+            // Next month days
+            const totalCells = firstDay + daysInMonth;
+            const remainingCells = 42 - totalCells; // 6 rows * 7 days
+            for (let day = 1; day <= remainingCells; day++) {
+                html += `<div class="day-cell other-month">${day}</div>`;
+            }
+            
+            document.getElementById('englishCalendar').innerHTML = html;
+            document.getElementById('englishDate').textContent = date.getDate();
+            document.getElementById('englishInfo').textContent = 
+                `${englishMonths[month]} ${year}`;
+        }
+
+        function renderBengaliCalendar() {
+            const date = currentDates.bengali;
+            const bengaliDate = gregorianToBengali(date);
+            const year = date.getFullYear();
+            const month = date.getMonth();
+            const today = new Date();
+            
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const prevMonthDays = new Date(year, month, 0).getDate();
+            
+            let html = '';
+            
+            // Day headers
+            bengaliDays.forEach(day => {
+                html += `<div class="day-header bengali-text">${day}</div>`;
+            });
+            
+            // Previous month days
+            for (let i = firstDay - 1; i >= 0; i--) {
+                html += `<div class="day-cell other-month bengali-text">${toBengaliNumber(prevMonthDays - i)}</div>`;
+            }
+            
+            // Current month days
+            for (let day = 1; day <= daysInMonth; day++) {
+                const isToday = day === today.getDate() && 
+                               month === today.getMonth() && 
+                               year === today.getFullYear();
+                const className = isToday ? 'day-cell today bengali-text' : 'day-cell bengali-text';
+                html += `<div class="${className}">${toBengaliNumber(day)}</div>`;
+            }
+            
+            // Next month days
+            const totalCells = firstDay + daysInMonth;
+            const remainingCells = 42 - totalCells;
+            for (let day = 1; day <= remainingCells; day++) {
+                html += `<div class="day-cell other-month bengali-text">${toBengaliNumber(day)}</div>`;
+            }
+            
+            document.getElementById('bengaliCalendar').innerHTML = html;
+            document.getElementById('bengaliDate').textContent = toBengaliNumber(bengaliDate.day);
+            document.getElementById('bengaliInfo').textContent = 
+                `${bengaliDate.monthName} ${toBengaliNumber(bengaliDate.year)}`;
+        }
+
+        function renderArabicCalendar() {
+            const date = currentDates.arabic;
+            const islamicDate = gregorianToIslamic(date);
+            const year = date.getFullYear();
+            const month = date.getMonth();
+            const today = new Date();
+            
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const prevMonthDays = new Date(year, month, 0).getDate();
+            
+            let html = '';
+            
+            // Day headers (in Bengali)
+            bengaliDays.forEach(day => {
+                html += `<div class="day-header bengali-text">${day}</div>`;
+            });
+            
+            // Previous month days
+            for (let i = firstDay - 1; i >= 0; i--) {
+                html += `<div class="day-cell other-month bengali-text">${toBengaliNumber(prevMonthDays - i)}</div>`;
+            }
+            
+            // Current month days
+            for (let day = 1; day <= daysInMonth; day++) {
+                const isToday = day === today.getDate() && 
+                               month === today.getMonth() && 
+                               year === today.getFullYear();
+                const className = isToday ? 'day-cell today bengali-text' : 'day-cell bengali-text';
+                html += `<div class="${className}">${toBengaliNumber(day)}</div>`;
+            }
+            
+            // Next month days
+            const totalCells = firstDay + daysInMonth;
+            const remainingCells = 42 - totalCells;
+            for (let day = 1; day <= remainingCells; day++) {
+                html += `<div class="day-cell other-month bengali-text">${toBengaliNumber(day)}</div>`;
+            }
+            
+            document.getElementById('arabicCalendar').innerHTML = html;
+            document.getElementById('arabicDate').textContent = toBengaliNumber(islamicDate.day);
+            document.getElementById('arabicInfo').textContent = 
+                `${islamicDate.monthNameBengali} ${toBengaliNumber(islamicDate.year)} হিজরি`;
+        }
+
+        function updateInfo() {
+            const date = new Date();
+            const bengaliDate = gregorianToBengali(date);
+            
+            document.getElementById('season').textContent = seasons[date.getMonth()];
+            document.getElementById('bengaliSeason').textContent = bengaliDate.season;
+            document.getElementById('dayOfYear').textContent = getDayOfYear(date);
+            document.getElementById('weekNumber').textContent = getWeekNumber(date);
+        }
+
+        // Navigation Functions
+        function changeMonth(calendar, direction) {
+            const date = currentDates[calendar];
+            date.setMonth(date.getMonth() + direction);
+            
+            if (calendar === 'unified') {
+                renderUnifiedCalendar();
+            } else if (calendar === 'english') {
+                renderEnglishCalendar();
+            } else if (calendar === 'bengali') {
+                renderBengaliCalendar();
+            } else if (calendar === 'arabic') {
+                renderArabicCalendar();
+            }
+        }
+
+        function changeView(view) {
+            currentView = view;
+            
+            // Update active button
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Get all calendar cards
+            const unifiedCard = document.getElementById('unifiedCard');
+            const bengaliCard = document.getElementById('bengaliCard');
+            const englishCard = document.getElementById('englishCard');
+            const arabicCard = document.getElementById('arabicCard');
+            const colorLegend = document.getElementById('colorLegend');
+            
+            // Hide all first
+            unifiedCard.style.display = 'none';
+            bengaliCard.style.display = 'none';
+            englishCard.style.display = 'none';
+            arabicCard.style.display = 'none';
+            colorLegend.style.display = 'none';
+            
+            // Show based on view
+            if (view === 'unified') {
+                unifiedCard.style.display = 'block';
+                colorLegend.style.display = 'flex';
+                renderUnifiedCalendar();
+            } else if (view === 'all') {
+                bengaliCard.style.display = 'block';
+                englishCard.style.display = 'block';
+                arabicCard.style.display = 'block';
+                renderBengaliCalendar();
+                renderEnglishCalendar();
+                renderArabicCalendar();
+            } else if (view === 'bengali') {
+                bengaliCard.style.display = 'block';
+            } else if (view === 'english') {
+                englishCard.style.display = 'block';
+            } else if (view === 'arabic') {
+                arabicCard.style.display = 'block';
+            }
+        }
+
+        // Initialize
+        function init() {
+            setTimeout(() => {
+                renderUnifiedCalendar();
+                renderEnglishCalendar();
+                renderBengaliCalendar();
+                renderArabicCalendar();
+                updateInfo();
+                
+                document.getElementById('loadingScreen').classList.add('hidden');
+            }, 1500);
+        }
+
+        // Start the app
+        window.addEventListener('load', init);
+
+        // Update time every minute
+        setInterval(() => {
+            updateInfo();
+        }, 60000);
+    </script>
+</body>
+</html>
