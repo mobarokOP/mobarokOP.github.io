@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tri-Calendar - Bangla, English & Arabic</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Noto+Sans+Bengali:wght@400;500;600&family=Noto+Naskh+Arabic:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-container hidden" id="loadingScreen">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading Calendars...</div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <header>
+            <h1>Tri-Calendar</h1>
+            <div class="subtitle">Bangla • English • Arabic</div>
+        </header>
+
+        <!-- Calendar Navigation -->
+        <div class="calendar-nav">
+            <button class="nav-btn active" onclick="changeView('unified')">Unified View</button>
+            <button class="nav-btn" onclick="changeView('all')">All Calendars</button>
+            <button class="nav-btn bengali-text" onclick="changeView('bengali')">বাংলা</button>
+            <button class="nav-btn" onclick="changeView('english')">English</button>
+            <button class="nav-btn bengali-text" onclick="changeView('arabic')">আরবি</button>
+        </div>
+
+        <!-- Color Legend -->
+        <div class="color-legend" id="colorLegend">
+            <div class="legend-item">
+                <div class="legend-dot english-dot"></div>
+                <span>English Date</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot bangla-dot"></div>
+                <span class="bengali-text">বাংলা তারিখ</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot arabic-dot"></div>
+                <span class="bengali-text">আরবি তারিখ</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot today-dot"></div>
+                <span>Today</span>
+            </div>
+        </div>
+
+        <!-- Calendars Grid -->
+        <div class="calendars-grid" id="calendarsGrid">
+            <!-- Unified Calendar (Main View) -->
+            <div class="calendar-card" id="unifiedCard" style="grid-column: 1 / -1;">
+                <div class="calendar-header">
+                    <h2 class="calendar-title">Unified Calendar</h2>
+                    <div class="nav-controls">
+                        <div class="nav-arrow" onclick="changeMonth('unified', -1)">‹</div>
+                        <div class="nav-arrow" onclick="changeMonth('unified', 1)">›</div>
+                    </div>
+                </div>
+                <div class="current-date-display">
+                    <div class="date-large" id="unifiedDate">—</div>
+                    <div class="date-info" id="unifiedInfo">Loading...</div>
+                    <div class="date-additional">
+                        <span class="bengali-text" id="unifiedBengali" style="color: #667eea;">—</span>
+                        <span class="bengali-text" id="unifiedArabic" style="color: #f5576c;">—</span>
+                    </div>
+                </div>
+                <div class="calendar-days" id="unifiedCalendar">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Bengali Calendar -->
+            <div class="calendar-card" id="bengaliCard" style="display: none;">
+                <div class="calendar-header">
+                    <h2 class="calendar-title bengali-text">বাংলা</h2>
+                    <div class="nav-controls">
+                        <div class="nav-arrow" onclick="changeMonth('bengali', -1)">‹</div>
+                        <div class="nav-arrow" onclick="changeMonth('bengali', 1)">›</div>
+                    </div>
+                </div>
+                <div class="current-date-display bengali-text">
+                    <div class="date-large" id="bengaliDate">—</div>
+                    <div class="date-info" id="bengaliInfo">Loading...</div>
+                </div>
+                <div class="calendar-days" id="bengaliCalendar">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- English Calendar -->
+            <div class="calendar-card" id="englishCard" style="display: none;">
+                <div class="calendar-header">
+                    <h2 class="calendar-title">English</h2>
+                    <div class="nav-controls">
+                        <div class="nav-arrow" onclick="changeMonth('english', -1)">‹</div>
+                        <div class="nav-arrow" onclick="changeMonth('english', 1)">›</div>
+                    </div>
+                </div>
+                <div class="current-date-display">
+                    <div class="date-large" id="englishDate">—</div>
+                    <div class="date-info" id="englishInfo">Loading...</div>
+                </div>
+                <div class="calendar-days" id="englishCalendar">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Arabic/Islamic Calendar -->
+            <div class="calendar-card" id="arabicCard" style="display: none;">
+                <div class="calendar-header">
+                    <h2 class="calendar-title bengali-text">ইসলামিক ক্যালেন্ডার</h2>
+                    <div class="nav-controls">
+                        <div class="nav-arrow" onclick="changeMonth('arabic', -1)">‹</div>
+                        <div class="nav-arrow" onclick="changeMonth('arabic', 1)">›</div>
+                    </div>
+                </div>
+                <div class="current-date-display bengali-text">
+                    <div class="date-large" id="arabicDate">—</div>
+                    <div class="date-info" id="arabicInfo">Loading...</div>
+                </div>
+                <div class="calendar-days" id="arabicCalendar">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Info Section -->
+        <div class="info-section">
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="info-label">Current Season</div>
+                    <div class="info-value" id="season">—</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label bengali-text">বাংলা ঋতু</div>
+                    <div class="info-value bengali-text" id="bengaliSeason">—</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">Day of Year</div>
+                    <div class="info-value" id="dayOfYear">—</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">Week Number</div>
+                    <div class="info-value" id="weekNumber">—</div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Multi-Calendar System • Created with ❤️</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
